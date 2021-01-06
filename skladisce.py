@@ -7,16 +7,20 @@ freq = 440
 
 
 NxP_start = [
-    ['', '', ''],
-    ['', '', ''],
-    ['A', 'B', 'C']
+    ['', '', '', '', ''],
+    ['', '', '', '', ''],
+    ['B', '', '', '', ''],
+    ['A', 'C', 'D', 'E', 'F']
 ]
 
 NxP_end = [
-    ['A', '', ''],
-    ['C', '', ''],
-    ['B', '', '']
+    ['', 'C', '', '', ''],
+    ['', 'E', '', '', ''],
+    ['F', 'D', '', '', ''],
+    ['B', 'A', '', '', '']
 ]
+
+
 
 
 N = len(NxP_start)
@@ -28,9 +32,6 @@ P = len(NxP_start[N-1])
 
 # p => 1 <= p <= P
 # r => 1 <= r <= P
-
-
-
 
 def prestavi(p, r, matrika1):
 
@@ -113,21 +114,17 @@ def BFS(graf, root):
 
         for neighbour in graf.get(vozlisce):
             if str(neighbour) not in seen:
-                print(i, ".")
-                i += 1
+                #print(i, ".")
+                #i += 1
                 kopija_neig = naredi_matriko(neighbour)
                 napolni(graf, neighbour, kopija_neig)
                 vrsta.append(neighbour)
+                seen.add(str(neighbour))
                 if tuple_to_list(neighbour) == NxP_end:
-                    winsound.Beep(freq, duration)
+                    #winsound.Beep(freq, duration)
                     return neighbour
 
 
-
-
-
-
-kopija = naredi_matriko(NxP_start)
 
 g = Graph()
 
