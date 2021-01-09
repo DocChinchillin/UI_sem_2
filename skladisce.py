@@ -43,7 +43,8 @@ st_obiskanih_vozlisc = 0
 
 def prestavi(p, r, matrika1):
     matrika = matrika1[:]
-
+    N = len(matrika)
+    P = len(matrika[N - 1])
     first_element = ''
     delete_i = -1
     delete_p_1 = -1
@@ -259,11 +260,12 @@ def izrisi_pot(start, end, pot):
 def lep_izpis_ids():
     start_m, end_m = get_matrike("D:\\Python\\UI_sem_2\\primer1_zacetna.txt",  # ce podas 0, 0 bo hotu iz system.in
                                  "D:\\Python\\UI_sem_2\\primer1_koncna.txt")
-    pot = IDS(10, start_m, end_m)
+
     print("Start matrika:")
     izpis(start_m)
-    print("End matrika:")
+    print("\nEnd matrika:")
     izpis(end_m)
+    pot = IDS(12, start_m, end_m)
     print("\nPot:")
     print(pot)
     print("Število obiskanih vozlisc", st_obiskanih_vozlisc)
