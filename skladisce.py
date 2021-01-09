@@ -1,6 +1,7 @@
+import itertools
+import copy
 from graf import Graph
 import collections
-
 
 '''
 NxP_start = [
@@ -35,7 +36,6 @@ NxP_start = [
     ['A', 'B', 'C']
 ]
 
-
 NxP_end = [
     ['A', '', ''],
     ['B', '', ''],
@@ -53,51 +53,53 @@ NxP_end = [
 ]
 '''
 N = len(NxP_start)
-P = len(NxP_start[N-1])
+P = len(NxP_start[N - 1])
+st_obiskanih_vozlisc = 0
 
-
-#P - odstavnih polozajev
-#N - velikih skatelj ena na drugo
+# P - odstavnih polozajev
+# N - velikih skatelj ena na drugo
 
 # p => 1 <= p <= P
 # r => 1 <= r <= P
 
 def prestavi(p, r, matrika1):
-
     matrika = matrika1[:]
 
     first_element = ''
     delete_i = -1
     delete_p_1 = -1
 
-    #ce je p, r return matriko
+    # ce je p, r return matriko
     if p == r:
         return matrika
     # dokler nenajdes nepraznega in ga shranis v first_element
     for i in range(0, N):
-        if matrika[i][p-1] != '':
-            first_element = matrika[i][p-1]
+        if matrika[i][p - 1] != '':
+            first_element = matrika[i][p - 1]
             delete_i = i
-            delete_p_1 = p-1
+            delete_p_1 = p - 1
             break
     # dokler nenajdes prvega praznega od spodi navzgor in shranis element iz
     # first_element v ta prostor in zbrises element iz kordinati i in p-1
-    for j in range(N-1, -1, -1):
-        if matrika[j][r-1] == '':
-            matrika[j][r-1] = first_element
+    for j in range(N - 1, -1, -1):
+        if matrika[j][r - 1] == '':
+            matrika[j][r - 1] = first_element
             if delete_i > -1 and delete_p_1 > -1:
                 matrika[delete_i][delete_p_1] = ''
             break
 
     return matrika
 
+
 def izpis(NxP):
     for a in NxP:
         print(a)
 
+
 # for dict key = tuple
 def tuple_to_list(t):
     return [list(i) for i in t]
+
 
 def list_to_tuple(l):
     t = tuple()
@@ -105,14 +107,15 @@ def list_to_tuple(l):
         t += tuple(i),
     return t
 
+
 def naredi_matriko(matrika):
     return [list(i) for i in matrika]
 
 
 def napolni(graf, start_m):
     start = list_to_tuple(start_m)
-    for p in range(1, P+1):
-        for r in range(1, P+1):
+    for p in range(1, P + 1):
+        for r in range(1, P + 1):
             kopija = naredi_matriko(start_m)
             x = prestavi(p, r, kopija)
             tuple_x = list_to_tuple(x)
@@ -122,18 +125,16 @@ def napolni(graf, start_m):
 
 
 def BFS(graf, root):
-
-
     oce_od_elementa = collections.defaultdict(tuple)
 
     vrsta = []
 
     seen = set()
 
-    #dodam root
+    # dodam root
     vrsta.append(list_to_tuple(root))
     seen.add(str(root))
-    #kopija = naredi_matriko(root) #kopija start
+    # kopija = naredi_matriko(root) #kopija start
     napolni(graf, root)
     stevilo_pregledanih_vozlisc = 1
     while vrsta:
@@ -152,27 +153,146 @@ def BFS(graf, root):
                     return find_path(graf, neighbour, oce_od_elementa)
 
 
+def stolpci_s_skatlo(matrika):
+    stolpci = set()
+    for vrstica in matrika:
+        i = 1
+        for pod in vrstica:
+            if pod != "":
+                stolpci.add(i)
+            i += 1
+
+    return stolpci
+
+
+def stolpci_s_prostorom(matrika):
+    stolpci = set()
+    vrstica = matrika[0]
+    i = 1
+    for pod in vrstica:
+        if pod == "" or pod == " ":
+            stolpci.add(i)
+        i += 1
+
+    return stolpci
+
+
+def mozni_premiki(matrika): #vrne set tuplov moznih premikov
+    moznosti = set()
+    for a in stolpci_s_skatlo(matrika):
+        for b in stolpci_s_prostorom(matrika):
+            if a != b:
+                moznosti.add((a, b))
+    return moznosti
+
+def IDS(max_globina, start_matrika, end_matrika):
+    globina = 0
+
+    while globina < max_globina:
+        for premik in mozni_premiki(start_matrika):
+            output = dls(globina, prestavi(premik[0], premik[1], copy.deepcopy(start_matrika)), end_matrika, premik)
+            if output:
+                break
+        if output:
+            break
+        globina += 1
+
+    return list(reversed(output))
+
+
+
+def dls(max_globina, start_matrika, end_matrika, parent_premik):
+    global st_obiskanih_vozlisc
+    if max_globina == 0:
+        if start_matrika == end_matrika:
+            return [parent_premik]
+        else:
+            return None
+    elif max_globina > 0:
+        for premik in mozni_premiki(start_matrika):
+            st_obiskanih_vozlisc += 1
+            cur_matrika = prestavi(premik[0], premik[1], copy.deepcopy(start_matrika))
+            neki = dls(max_globina-1, cur_matrika, end_matrika, premik)
+            if neki:
+                poped = neki.pop()
+                if poped == premik:
+                    neki.append(premik)
+                    neki.append(parent_premik)
+                    return neki
+
 
 def find_path(graf, neighbour, oce_sin_dict):
     path = [neighbour]
     while neighbour != list_to_tuple(NxP_start):
         neighbour = oce_sin_dict[neighbour]
         path.append(neighbour)
-    path = path[::-1] #obrnem
+    path = path[::-1]  # obrnem
     premiki = []
     i = 0
     j = 1
-    while i < len(path)-1 and j < len(path):
+    while i < len(path) - 1 and j < len(path):
         premiki.append(graf.getPremik(path[i], path[j]))
         i += 1
         j += 1
-    print("Max globina:", len(path)-1)
+    print("Max globina:", len(path) - 1)
     return "Pot: " + str(premiki)
 
 
+def get_matrike(start, end):  # če podas 0 ,0 kot argument hoce poti iz System.in drgace podas absolutne poti do start matrike file in end matrike file vrne ti matrike
+    if start == 0:
+        start_path = input("Input start matrix path \n")
+    start_path = start
+    f = open(start_path, "r")
+    start_matrika = []
+
+    for x in f:
+        vrstica = (x.replace("'", "").replace("\n", "").replace(" ", "").split(","))
+        start_matrika.append(vrstica)
+    f.close()
+    if end == 0:
+        end_path = input("Input end matrix path \n")
+    end_path = end
+    f = open(end_path, "r")
+    end_matrika = []
+
+    for x in f:
+        vrstica = (x.replace("'", "").replace("\n", "").replace(" ", "").split(","))
+        end_matrika.append(vrstica)
+    f.close()
+    return start_matrika,end_matrika
+
+
+def izrisi_pot(start, end, pot):
+    print("Start matrika:")
+    izpis(start)
+    print()
+    for premik in pot:
+        print("Premik", premik)
+        iz, v = premik
+        prestavi(iz,v,start)
+        izpis(start)
+    print()
+    print("End matrika:")
+    izpis(end)
+
+
+def lep_izpis_ids():
+    start_m, end_m = get_matrike("D:\\Python\\UI_sem_2\\primer1_zacetna.txt",  # ce podas 0, 0 bo hotu iz system.in
+                                 "D:\\Python\\UI_sem_2\\primer1_koncna.txt")
+    pot = IDS(10, start_m, end_m)
+    print("Start matrika:")
+    izpis(start_m)
+    print("End matrika:")
+    izpis(end_m)
+    print("\nPot:")
+    print(pot)
+    print("Število obiskanih vozlisc", st_obiskanih_vozlisc)
+    print()
+    izrisi_pot(copy.deepcopy(start_m), copy.deepcopy(end_m), pot)
+
+lep_izpis_ids()
 
 
 g = Graph()
 
-print(BFS(g, NxP_start))
-
+#print(BFS(g, NxP_start))
