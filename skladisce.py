@@ -13,8 +13,12 @@ def empty(seznam):
 
 
 def get_matrix_s_e(primer):
+    start_matrix = open(f'D:Python\\UI_sem_2\\primer{primer}_zacetna.txt')
+    end_matrix = open(f'D:Python\\UI_sem_2\\primer{primer}_koncna.txt')
+    '''
     start_matrix = open(f'C:\\Users\\Martin\\PycharmProjects\\UI_sem_2\\primer{primer}_zacetna.txt')
     end_matrix = open(f'C:\\Users\\Martin\\PycharmProjects\\UI_sem_2\\primer{primer}_koncna.txt')
+    '''
 
     NxP_s = []
     NxP_e = []
@@ -34,14 +38,8 @@ def get_matrix_s_e(primer):
 
     return NxP_s, NxP_e
 
-st_obiskanih_vozlisc = 0
 
 
-# P - odstavnih polozajev
-# N - velikih skatelj ena na drugo
-
-# p => 1 <= p <= P
-# r => 1 <= r <= P
 
 def prestavi(p, r, matrika1):
     matrika = matrika1[:]
@@ -289,15 +287,14 @@ def lep_izpis_ids(start_path,end_path):
     izpis(start_m)
     print("\nEnd matrika:")
     izpis(end_m)
-    pot = IDS(12, start_m, end_m)
+    pot = IDS(15, start_m, end_m)
     print("\nPot:")
     print(pot)
     print("Število obiskanih vozlisc", st_obiskanih_vozlisc)
     print()
-    izrisi_pot(copy.deepcopy(start_m), copy.deepcopy(end_m), pot)
+    #izrisi_pot(copy.deepcopy(start_m), copy.deepcopy(end_m), pot)
 
 
-#lep_izpis_ids()
 def get_end_x_y(x, y, element, end):
     if end[y][x] != '' and end[y][x] != element:
         return 2
@@ -385,7 +382,7 @@ def A_star(root):
 
         if current == list_to_tuple(NxP_end):
             print('Stevilo pregledanih vozlisc:', stevilo_pregledanih_vozlisc)
-            return find_path(graf, current, oce_od_elementa) # current # find_path(graf, current, oce_od_elementa)
+            return find_path(graf, current, oce_od_elementa,NxP_start) # current # find_path(graf, current, oce_od_elementa)
 
         queue.remove(current)
 
@@ -481,12 +478,12 @@ def izpis_dvo_bfs(start_path, end_path):
     print("#######################################")
 
 
-path_s = "D:\\Python\\UI_sem_2\\primer5_zacetna.txt"
-path_e = "D:\\Python\\UI_sem_2\\primer5_koncna.txt"
+path_s = "D:\\Python\\UI_sem_2\\primer3_zacetna.txt"
+path_e = "D:\\Python\\UI_sem_2\\primer3_koncna.txt"
+
 #lep_izpis_ids(path_s, path_e)
-izpis_dvo_bfs(path_s, path_e)
-#s_m, e_m =get_matrike("D:\\Python\\UI_sem_2\\primer5_zacetna.txt","D:\\Python\\UI_sem_2\\primer5_koncna.txt")
-#print(BFS(s_m, e_m))
+#izpis_dvo_bfs(path_s, path_e)
+
 
 
 NxP_start = []
@@ -502,5 +499,5 @@ for i in range(1, 6):
     N = len(NxP_start)
     P = len(NxP_start[N - 1])
     #print(BFS(NxP_start), '\n')
-    print(A_star(NxP_start))
+    #print(A_star(NxP_start))
 
