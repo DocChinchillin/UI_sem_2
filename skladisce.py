@@ -6,71 +6,33 @@ import sys
 import math
 
 
-'''
-NxP_start = [
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['B', '', '', '', ''],
-    ['A', 'C', 'D', 'E', 'F']
-]
 
-NxP_end = [
-    ['', 'C', '', '', ''],
-    ['', 'E', '', '', ''],
-    ['F', 'D', '', '', ''],
-    ['B', 'A', '', '', '']
-]
-
-NxP_start = [
-    ['', '', ''],
-    ['', '', ''],
-    ['A', 'B', 'C']
-]
+def empty(seznam):
+    seznam = []
 
 
-NxP_end = [
-    ['A', '', ''],
-    ['B', '', ''],
-    ['C', '', '']
-]
+def get_matrix_s_e(primer):
+    start_matrix = open(f'C:\\Users\\Martin\\PycharmProjects\\UI_sem_2\\primer{primer}_zacetna.txt')
+    end_matrix = open(f'C:\\Users\\Martin\\PycharmProjects\\UI_sem_2\\primer{primer}_koncna.txt')
 
-NxP_start = [
-    ['B', '', ''],
-    ['A', '', '']
-]
+    NxP_s = []
+    NxP_e = []
 
-NxP_end = [
-    ['', 'B', ''],
-    ['', 'A', '']
-]
+    for line in start_matrix:
+        x = line.replace("'", '').replace(' ', '').strip().split(',')
+        line = []
+        for element in x:
+            line.append(element)
+        NxP_s.append(line)
+    for line in end_matrix:
+        x = line.replace("'", '').replace(' ', '').strip().split(',')
+        line = []
+        for element in x:
+            line.append(element)
+        NxP_e.append(line)
 
+    return NxP_s, NxP_e
 
-NxP_start = [
-    ['', '', '', ''],
-    ['E', 'F', '', ''],
-    ['A', 'C', 'D', 'B']
-]
-
-NxP_end = [
-    ['', '', '', ''],
-    ['D', 'E', '', 'C'],
-    ['B', 'A', '', 'F']
-]
-'''
-
-NxP_start = [
-    ['B','D','F','',''],
-    ['A','C','E','','']
-]
-
-NxP_end = [
-    ['A','C','E','',''],
-    ['B','D','F','','']
-
-]
-
-N = len(NxP_start)
-P = len(NxP_start[N - 1])
 st_obiskanih_vozlisc = 0
 
 # P - odstavnih polozajev
@@ -308,9 +270,23 @@ def lep_izpis_ids():
     print()
     izrisi_pot(copy.deepcopy(start_m), copy.deepcopy(end_m), pot)
 
-lep_izpis_ids()
+#lep_izpis_ids()
+def get_end_x_y(x, y, element, end):
+    if end[y][x] != '' and end[y][x] != element:
+        return 2
+    return 0
 
 
+def wrong_place(current, end):
+    elements = 0
+
+    for y in range(len(current)):
+        for x in range(len(current[y])):
+            if current[y][x] != '':
+                if current[y][x] != end[y][x]:
+                    elements += 1
+                elements += get_end_x_y(x, y, current[y][x], end)
+    return elements
 
 def pitagorov_izrek(x1, y1, x2, y2):
     return int(math.sqrt(abs(x2 - x1) + abs(y2 - y1)))
@@ -355,7 +331,6 @@ def A_star(graf, root):
 
     queue = [list_to_tuple(root)]
 
-    seen = set()
 
     oce_od_elementa = collections.defaultdict(tuple)
 
@@ -363,41 +338,50 @@ def A_star(graf, root):
     g_score[list_to_tuple(root)] = 0
 
     f_score = collections.defaultdict(int)
-    f_score[list_to_tuple(root)] = eucledian_distance(root, NxP_end)
-
+    #f_score[list_to_tuple(root)] = eucledian_distance(root, NxP_end)
+    f_score[list_to_tuple(root)] = wrong_place(root, NxP_end) #worng place
     napolni(graf, root)    #napolni vse moznosti iz root-a
 
-    seen.add(str(root))
+
+    stevilo_pregledanih_vozlisc = 1
 
     while queue:
 
         current = min_value_dict(queue, f_score)   #get lowest score in f_score dict
 
         if current == list_to_tuple(NxP_end):
-            return current
+            print('Stevilo pregledanih vozlisc:', stevilo_pregledanih_vozlisc)
+            return find_path(graf, current, oce_od_elementa) # current # find_path(graf, current, oce_od_elementa)
 
         queue.remove(current)
 
 
+
         for neighbour in graf.get(current):
-            if neighbour not in seen:
-                #dodam soseda v g_score z max value
-                g_score[neighbour] = sys.maxsize
 
-                zacasen_g_score = g_score[list_to_tuple(current)] + distance(current, neighbour)
+            #dodam soseda v g_score z max value
+            g_score[neighbour] = sys.maxsize
 
-                seen.add(str(neighbour))
+            stevilo_pregledanih_vozlisc += 1
 
-                if zacasen_g_score < g_score[neighbour]:
+            zacasen_g_score = g_score[list_to_tuple(current)] + distance(current, neighbour)
 
 
-                    g_score[neighbour] = zacasen_g_score
-                    f_score[neighbour] = g_score[neighbour] + eucledian_distance(current, NxP_end)
-                    #dodam v graf vse podvozisse vozlisc neigbour
-                    napolni(graf, neighbour)
-                    if neighbour not in queue:
-                        oce_od_elementa[neighbour] = current
-                        queue.append(neighbour)
+
+            if zacasen_g_score < g_score[neighbour]:
+
+                if neighbour not in oce_od_elementa:
+                    oce_od_elementa[neighbour] = current
+
+                g_score[neighbour] = zacasen_g_score
+                #f_score[neighbour] = g_score[neighbour] + eucledian_distance(current, NxP_end)
+                f_score[neighbour] = g_score[neighbour] + wrong_place(current, NxP_end)
+                #dodam v graf vse podvozisse vozlisc neigbour
+                napolni(graf, neighbour)
+                if neighbour not in queue:
+                    queue.append(neighbour)
+
+    return "Fail"
 
 
 
@@ -406,5 +390,18 @@ def A_star(graf, root):
 
 g = Graph()
 
-#print(BFS(g, NxP_start))
-#print(A_star(g, NxP_start))
+NxP_start = []
+NxP_end = []
+
+N = 0
+P = 0
+
+
+for i in range(1, 6):
+    print(f"Primer {i}.")
+    NxP_start, NxP_end = get_matrix_s_e(i)
+    N = len(NxP_start)
+    P = len(NxP_start[N - 1])
+    #print(BFS(g, NxP_start), '\n')
+    print(A_star(g, NxP_start))
+
