@@ -4,22 +4,9 @@ from graf import Graph
 import collections
 import sys
 import math
+st_obiskanih_vozlisc = 0
+globina = 0
 
-
-'''
-NxP_start = [
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['B', '', '', '', ''],
-    ['A', 'C', 'D', 'E', 'F']
-]
-
-NxP_end = [
-    ['', 'C', '', '', ''],
-    ['', 'E', '', '', ''],
-    ['F', 'D', '', '', ''],
-    ['B', 'A', '', '', '']
-]
 
 NxP_start = [
     ['', '', ''],
@@ -34,44 +21,8 @@ NxP_end = [
     ['C', '', '']
 ]
 
-NxP_start = [
-    ['B', '', ''],
-    ['A', '', '']
-]
-
-NxP_end = [
-    ['', 'B', ''],
-    ['', 'A', '']
-]
-
-
-NxP_start = [
-    ['', '', '', ''],
-    ['E', 'F', '', ''],
-    ['A', 'C', 'D', 'B']
-]
-
-NxP_end = [
-    ['', '', '', ''],
-    ['D', 'E', '', 'C'],
-    ['B', 'A', '', 'F']
-]
-'''
-
-NxP_start = [
-    ['B','D','F','',''],
-    ['A','C','E','','']
-]
-
-NxP_end = [
-    ['A','C','E','',''],
-    ['B','D','F','','']
-
-]
-
-N = len(NxP_start)
-P = len(NxP_start[N - 1])
-st_obiskanih_vozlisc = 0
+#N = len(NxP_start)
+#P = len(NxP_start[N - 1])
 
 # P - odstavnih polozajev
 # N - velikih skatelj ena na drugo
@@ -131,7 +82,10 @@ def naredi_matriko(matrika):
 
 
 def napolni(graf, start_m):
+    N = len(start_m)
+    P = len(start_m[N - 1])
     start = list_to_tuple(start_m)
+
     for p in range(1, P + 1):
         for r in range(1, P + 1):
             kopija = naredi_matriko(start_m)
@@ -142,9 +96,9 @@ def napolni(graf, start_m):
                 graf.addPremik(start, tuple_x, (p, r))
 
 
-def BFS(graf, root):
+def BFS(root, end):
     oce_od_elementa = collections.defaultdict(tuple)
-
+    graf = Graph()
     vrsta = []
 
     seen = set()
@@ -163,13 +117,14 @@ def BFS(graf, root):
         for neighbour in graf.get(vozlisce):
             if str(neighbour) not in seen:
                 stevilo_pregledanih_vozlisc += 1
-                oce_od_elementa[(neighbour)] = (vozlisce)
+                oce_od_elementa[neighbour] = vozlisce
                 napolni(graf, neighbour)
                 vrsta.append(neighbour)
                 seen.add(str(neighbour))
-                if tuple_to_list(neighbour) == NxP_end:
+
+                if tuple_to_list(neighbour) == end:
                     print("Stevilo pregledanih vozlisc:", stevilo_pregledanih_vozlisc)
-                    return find_path(graf, neighbour, oce_od_elementa)
+                    return find_path(graf, neighbour, oce_od_elementa, root)
 
 
 def stolpci_s_skatlo(matrika):
@@ -204,6 +159,7 @@ def mozni_premiki(matrika): #vrne set tuplov moznih premikov
                 moznosti.add((a, b))
     return moznosti
 
+
 def IDS(max_globina, start_matrika, end_matrika):
     globina = 0
 
@@ -217,7 +173,6 @@ def IDS(max_globina, start_matrika, end_matrika):
         globina += 1
 
     return list(reversed(output))
-
 
 
 def dls(max_globina, start_matrika, end_matrika, parent_premik):
@@ -240,8 +195,9 @@ def dls(max_globina, start_matrika, end_matrika, parent_premik):
                     return neki
 
 
-def find_path(graf, neighbour, oce_sin_dict):
+def find_path(graf, neighbour, oce_sin_dict, NxP_start):
     path = [neighbour]
+    global globina
     while neighbour != list_to_tuple(NxP_start):
         neighbour = oce_sin_dict[neighbour]
         path.append(neighbour)
@@ -253,8 +209,26 @@ def find_path(graf, neighbour, oce_sin_dict):
         premiki.append(graf.getPremik(path[i], path[j]))
         i += 1
         j += 1
-    print("Max globina:", len(path) - 1)
-    return "Pot: " + str(premiki)
+    globina = max(len(path) - 1, globina)
+    return premiki
+
+
+def find_path_reverse(graf, neighbour, oce_sin_dict, start):
+    path = [neighbour]
+    global globina
+    while neighbour != list_to_tuple(start):
+        neighbour = oce_sin_dict[neighbour]
+        path.append(neighbour)
+    path = path[::-1]  # obrnem
+    premiki = []
+    i = 0
+    j = 1
+    while i < len(path) - 1 and j < len(path):
+        premiki.append(graf.getPremik(path[j], path[i]))
+        i += 1
+        j += 1
+    globina = max(len(path) - 1, globina)
+    return list(reversed(premiki))
 
 
 def get_matrike(start, end):  # če podas 0 ,0 kot argument hoce poti iz System.in drgace podas absolutne poti do start matrike file in end matrike file vrne ti matrike
@@ -295,10 +269,9 @@ def izrisi_pot(start, end, pot):
     izpis(end)
 
 
-def lep_izpis_ids():
-    start_m, end_m = get_matrike("D:\\Python\\UI_sem_2\\primer1_zacetna.txt",  # ce podas 0, 0 bo hotu iz system.in
-                                 "D:\\Python\\UI_sem_2\\primer1_koncna.txt")
-
+def lep_izpis_ids(start_path,end_path):
+    start_m, end_m = get_matrike(start_path,end_path)
+    print("############Izpis IDS:############")
     print("Start matrika:")
     izpis(start_m)
     print("\nEnd matrika:")
@@ -310,12 +283,13 @@ def lep_izpis_ids():
     print()
     izrisi_pot(copy.deepcopy(start_m), copy.deepcopy(end_m), pot)
 
-lep_izpis_ids()
+
 
 
 
 def pitagorov_izrek(x1, y1, x2, y2):
     return int(math.sqrt(abs(x2 - x1) + abs(y2 - y1)))
+
 
 def get_distacne(element, end):
     for y in range(len(end)):
@@ -323,6 +297,8 @@ def get_distacne(element, end):
             if end[y][x] != '':
                 if element == end[y][x]:
                     return x, y
+
+
 #formula za hevristiko
 def eucledian_distance(now, end):
     sum = 0
@@ -333,6 +309,7 @@ def eucledian_distance(now, end):
                 sum += pitagorov_izrek(x, y, x2, y2)
     return sum
 
+
 def distance(now, end):
     sum = 0
     for y in range(len(now)):
@@ -341,6 +318,7 @@ def distance(now, end):
                 x2, y2 = get_distacne(now[y][x], end)
                 sum += pitagorov_izrek(x, y, x2, y2)
     return sum
+
 
 def min_value_dict(vrsta, f_score_dict): #returns tuple
     min = sys.maxsize
@@ -353,8 +331,9 @@ def min_value_dict(vrsta, f_score_dict): #returns tuple
             min_element = ele_t
     return min_element
 
-def A_star(graf, root):
 
+def A_star(root):
+    graf = Graph()
     queue = [list_to_tuple(root)]
 
     seen = set()
@@ -402,11 +381,74 @@ def A_star(graf, root):
                         queue.append(neighbour)
 
 
+def dvosmerno_bfs(root, end):
+    global st_obiskanih_vozlisc
+    oce_od_elementa = collections.defaultdict(tuple)
+    oce_od_elementa_nzj = collections.defaultdict(tuple)
+    g = Graph()
+    ng = Graph()
+    vrsta = []
+    vrsta_nzj = []
+    seen = set()
+    seen_nzj = set()
+    # dodam root
+    vrsta.append(list_to_tuple(root))
+    vrsta_nzj.append(list_to_tuple(end))
+    seen.add(str(root))
+    seen_nzj.add(str(end))
+    # kopija = naredi_matriko(root) #kopija start
+    resitve = (list_to_tuple(end),)
+    konci = (list_to_tuple(root),)
+    napolni(g, root)
+    napolni(ng, end)
+    stevilo_pregledanih_vozlisc = 1
+    while vrsta:
+        vozlisce = vrsta.pop(0)
+        vozlisce_nzj = vrsta_nzj.pop(0)
+        for neighbour in ng.get(vozlisce_nzj):
+            if str(neighbour) not in seen_nzj:
+                stevilo_pregledanih_vozlisc += 1
+                oce_od_elementa_nzj[neighbour] = vozlisce_nzj
+                napolni(ng, neighbour)
+                vrsta_nzj.append(neighbour)
+                seen_nzj.add(str(neighbour))
+                resitve += (neighbour,)
+                if neighbour in konci:
+                    st_obiskanih_vozlisc = stevilo_pregledanih_vozlisc
+                    return find_path(g, neighbour, oce_od_elementa, root) + find_path_reverse(ng, neighbour, oce_od_elementa_nzj, end)
+
+        for neighbour in g.get(vozlisce):
+            if str(neighbour) not in seen:
+                stevilo_pregledanih_vozlisc += 1
+                oce_od_elementa[neighbour] = vozlisce
+                napolni(g, neighbour)
+                vrsta.append(neighbour)
+                seen.add(str(neighbour))
+                konci += (neighbour,)
+                if neighbour in resitve:
+
+                    st_obiskanih_vozlisc = stevilo_pregledanih_vozlisc
+                    return find_path(g, neighbour, oce_od_elementa, root) + find_path_reverse(ng, neighbour, oce_od_elementa_nzj, end)
+
+def izpis_dvo_bfs(start_path, end_path):
+    print("############Izpis dvosmerni bfs:############")
+    start_m, end_m = get_matrike(start_path, end_path)  # ce podas 0, 0 bo hotu iz system.in
+    print("Start matrika:")
+    izpis(start_m)
+    print("End matrika:")
+    izpis(end_m)
+    path = dvosmerno_bfs(start_m, end_m)
+    print("Pot:")
+    print(path)
+    #izrisi_pot(start_m, end_m, path)
+    print("#######################################")
 
 
+path_s = "D:\\Python\\UI_sem_2\\primer5_zacetna.txt"
+path_e = "D:\\Python\\UI_sem_2\\primer5_koncna.txt"
+#lep_izpis_ids(path_s, path_e)
+izpis_dvo_bfs(path_s, path_e)
+#s_m, e_m =get_matrike("D:\\Python\\UI_sem_2\\primer5_zacetna.txt","D:\\Python\\UI_sem_2\\primer5_koncna.txt")
+#print(BFS(s_m, e_m))
 
-
-g = Graph()
-
-#print(BFS(g, NxP_start))
-#print(A_star(g, NxP_start))
+#print(A_star(NxP_start))
