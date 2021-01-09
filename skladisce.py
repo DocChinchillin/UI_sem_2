@@ -1,5 +1,8 @@
 from graf import Graph
 import collections
+import sys
+import math
+import winsound
 
 
 '''
@@ -17,18 +20,6 @@ NxP_end = [
     ['B', 'A', '', '', '']
 ]
 
-
-
-NxP_start = [
-    ['B', '', ''],
-    ['A', '', '']
-]
-
-NxP_end = [
-    ['', 'B', ''],
-    ['', 'A', '']
-]
-'''
 NxP_start = [
     ['', '', ''],
     ['', '', ''],
@@ -41,7 +32,7 @@ NxP_end = [
     ['B', '', ''],
     ['C', '', '']
 ]
-'''
+
 NxP_start = [
     ['B', '', ''],
     ['A', '', '']
@@ -51,7 +42,33 @@ NxP_end = [
     ['', 'B', ''],
     ['', 'A', '']
 ]
+
+
+NxP_start = [
+    ['', '', '', ''],
+    ['E', 'F', '', ''],
+    ['A', 'C', 'D', 'B']
+]
+
+
+NxP_end = [
+    ['', '', '', ''],
+    ['D', 'E', '', 'C'],
+    ['B', 'A', '', 'F']
+]
 '''
+
+NxP_start = [
+    ['B','D','F','',''],
+    ['A','C','E','','']
+]
+
+NxP_end = [
+    ['A','C','E','',''],
+    ['B','D','F','','']
+
+]
+
 N = len(NxP_start)
 P = len(NxP_start[N-1])
 
@@ -133,7 +150,7 @@ def BFS(graf, root):
     #dodam root
     vrsta.append(list_to_tuple(root))
     seen.add(str(root))
-    #kopija = naredi_matriko(root) #kopija start
+
     napolni(graf, root)
     stevilo_pregledanih_vozlisc = 1
     while vrsta:
@@ -172,7 +189,102 @@ def find_path(graf, neighbour, oce_sin_dict):
 
 
 
+
+def pitagorov_izrek(x1, y1, x2, y2):
+    return int(math.sqrt(abs(x2 - x1) + abs(y2 - y1)))
+
+def get_distacne(element, end):
+    for y in range(len(end)):
+        for x in range(len(end[y])):
+            if end[y][x] != '':
+                if element == end[y][x]:
+                    return x, y
+#formula za hevristiko
+def eucledian_distance(now, end):
+    sum = 0
+    for y in range(len(now)):
+        for x in range(len(now[y])):
+            if now[y][x] != '':
+                x2, y2 = get_distacne(now[y][x], end)
+                sum += pitagorov_izrek(x, y, x2, y2)
+    return sum
+
+def distance(now, end):
+    sum = 0
+    for y in range(len(now)):
+        for x in range(len(now[y])):
+            if now[y][x] != '':
+                x2, y2 = get_distacne(now[y][x], end)
+                sum += pitagorov_izrek(x, y, x2, y2)
+    return sum
+
+def min_value_dict(vrsta, f_score_dict): #returns tuple
+    min = sys.maxsize
+    min_element = tuple()
+
+    for ele in vrsta:
+        ele_t = list_to_tuple(ele)
+        if min > f_score_dict[ele_t]:
+            min = f_score_dict[ele_t]
+            min_element = ele_t
+    return min_element
+
+def A_star(graf, root):
+
+    queue = [list_to_tuple(root)]
+
+    seen = set()
+
+    oce_od_elementa = collections.defaultdict(tuple)
+
+    g_score = collections.defaultdict(int)
+    g_score[list_to_tuple(root)] = 0
+
+    f_score = collections.defaultdict(int)
+    f_score[list_to_tuple(root)] = eucledian_distance(root, NxP_end)
+
+    napolni(graf, root)    #napolni vse moznosti iz root-a
+
+    seen.add(str(root))
+
+    while queue:
+
+        current = min_value_dict(queue, f_score)   #get lowest score in f_score dict
+
+        if current == list_to_tuple(NxP_end):
+            winsound.Beep(440, 3000)
+            return current
+
+        queue.remove(current)
+
+
+        for neighbour in graf.get(current):
+            if neighbour not in seen:
+                #dodam soseda v g_score z max value
+                g_score[neighbour] = sys.maxsize
+
+                zacasen_g_score = g_score[list_to_tuple(current)] + distance(current, neighbour)
+
+                seen.add(str(neighbour))
+
+                if zacasen_g_score < g_score[neighbour]:
+
+
+                    g_score[neighbour] = zacasen_g_score
+                    f_score[neighbour] = g_score[neighbour] + eucledian_distance(current, NxP_end)
+                    #dodam v graf vse podvozisse vozlisc neigbour
+                    napolni(graf, neighbour)
+                    if neighbour not in queue:
+                        oce_od_elementa[neighbour] = current
+                        queue.append(neighbour)
+
+
+
+
+
+
 g = Graph()
 
-print(BFS(g, NxP_start))
+#print(BFS(g, NxP_start))
 
+print(A_star(g, NxP_start))
