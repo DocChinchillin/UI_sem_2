@@ -283,6 +283,7 @@ def izrisi_pot(start, end, pot):
 def lep_izpis_ids(start_path,end_path):
     start_m, end_m = get_matrike(start_path,end_path)
     print("############Izpis IDS:############")
+    print(start_path)
     print("Start matrika:")
     izpis(start_m)
     print("\nEnd matrika:")
@@ -466,6 +467,7 @@ def dvosmerno_bfs(root, end):
 
 def izpis_dvo_bfs(start_path, end_path):
     print("############Izpis dvosmerni bfs:############")
+    print(start_path)
     start_m, end_m = get_matrike(start_path, end_path)  # ce podas 0, 0 bo hotu iz system.in
     print("Start matrika:")
     izpis(start_m)
@@ -474,14 +476,15 @@ def izpis_dvo_bfs(start_path, end_path):
     path = dvosmerno_bfs(start_m, end_m)
     print("Pot:")
     print(path)
+    print("Stevilo obiskanih vozlisc:", st_obiskanih_vozlisc)
     #izrisi_pot(start_m, end_m, path)
     print("#######################################")
 
 
-path_s = "D:\\Python\\UI_sem_2\\primer3_zacetna.txt"
-path_e = "D:\\Python\\UI_sem_2\\primer3_koncna.txt"
+path_s = "D:\\Python\\UI_sem_2\\primer4_zacetna.txt"
+path_e = "D:\\Python\\UI_sem_2\\primer4_koncna.txt"
 
-#lep_izpis_ids(path_s, path_e)
+lep_izpis_ids(path_s, path_e)
 #izpis_dvo_bfs(path_s, path_e)
 
 
@@ -492,7 +495,7 @@ NxP_end = []
 N = 0
 P = 0
 
-
+'''
 for i in range(1, 6):
     print(f"Primer {i}.")
     NxP_start, NxP_end = get_matrix_s_e(i)
@@ -500,4 +503,4 @@ for i in range(1, 6):
     P = len(NxP_start[N - 1])
     #print(BFS(NxP_start), '\n')
     #print(A_star(NxP_start))
-
+'''

@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ab582639-5db6-46e3-8b7e-42d13088b88a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/skladisce.py" beforeDir="false" afterPath="$PROJECT_DIR$/skladisce.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -37,7 +38,7 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration name="Skladisce.py" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="Skladisce.py" type="PythonConfigurationType" factoryName="Python" singleton="false">
       <module name="UI" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
